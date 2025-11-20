@@ -28,7 +28,9 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    "**/*.mts"
+    "**/*.mts",
+    "public/sw.js",
+    "src/_types/next-pwa.d.ts"
   ],
   "exclude": ["node_modules"]
 }
