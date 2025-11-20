@@ -15,6 +15,7 @@ const goodVibesMessages = [
 
 export default function Home() {
   const [subscription, setSubscription] = useState<PushSubscription | null>(null);
+  const [goodVibes, setGoodVibes] = useState<string | null>(null);
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
@@ -46,7 +47,6 @@ export default function Home() {
     }
   };
 
-  // ✅ Função para enviar Good Vibes
   const enviarGoodVibes = async () => {
     if (!subscription) return;
     console.log("Enviando Good Vibes...");
@@ -65,6 +65,8 @@ export default function Home() {
       body: JSON.stringify({ subscription, payload }),
     });
 
+    setGoodVibes(randomMessage);
+
     console.log("Good Vibes enviada:", payload.body);
   };
 
@@ -78,6 +80,8 @@ export default function Home() {
       <button type="button" onClick={enviarGoodVibes} disabled={!subscription}>
         Enviar Good Vibes
       </button>
+
+      <p>{goodVibes}</p>
 
       {subscription && (
         <pre>{JSON.stringify(subscription.toJSON(), null, 2)}</pre>
