@@ -59,7 +59,7 @@ export default function Home() {
       url: "/"
     };
 
-    await fetch("/api/notify", {
+    await fetch("_api/notify", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ subscription, payload }),
