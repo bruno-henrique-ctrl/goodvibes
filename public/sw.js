@@ -1,11 +1,29 @@
 self.addEventListener('push', (e) => {
-    const data = e.data?.json() || {};
-    self.registration.showNotification(data.title, {
-        body: data.body,
-        icon: data.icon || '/icons/icon192.png',
-        data: data.url || '/'
-    });
-})
+    console.log("📩 PUSH RECEBIDO NO SERVICE WORKER");
+
+    let data = {};
+    try {
+        data = e.data.json();
+        console.log("📦 DADOS DO PUSH:", data);
+    } catch {
+        console.log("⚠️ Erro ao ler o payload");
+    }
+
+    const title = data.title || "Sem título";
+    const body = data.body || "Sem mensagem";
+    const icon = data.icon || "/icon192.png";
+    const url = data.url || "/";
+
+    e.waitUntil(
+        self.registration.showNotification(title, {
+            body,
+            icon,
+            data: { url }
+        })
+    );
+
+    console.log("🔔 Notificação exibida");
+});
 
 self.addEventListener('notificationclick', (e) => {
     e.notification.close();
