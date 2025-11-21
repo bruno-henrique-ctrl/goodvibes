@@ -1,6 +1,5 @@
 import webPush from "web-push";
 
-// 👉 Configurar APENAS 1 vez
 webPush.setVapidDetails(
     "mailto:seuemail@gmail.com",
     process.env.NEXT_PUBLIC_VAPID_KEY!,

@@ -19,25 +19,26 @@ self.addEventListener("push", (e) => {
     self.registration.showNotification(data.title, {
         body: data.body,
         icon: data.icon || "/icons/icon192.png",
-        data: { url: data.url || "/" }
+        data: { url: data.url || "/" },
+        requireInteraction: true
     });
 });
 
-
-self.addEventListener('notificationclick', (e) => {
+self.addEventListener("notificationclick", (e) => {
     e.notification.close();
-    const url = e.notification.data;
+
+    const url = e.notification.data?.url || "/";
+
     e.waitUntil(
-        clients.matchAll({ type: 'window' }).then(windowClients => {
-            for (let client of windowClients) {
-                if (client.url === url && 'focus' in client) {
-                    return client.focus();
+        clients.matchAll({ type: "window", includeUncontrolled: true })
+            .then((windowClients) => {
+                for (const client of windowClients) {
+                    if (client.url === url && "focus" in client) {
+                        return client.focus();
+                    }
                 }
-            }
-            if (clients.openWindow) {
                 return clients.openWindow(url);
-            }
-        })
+            })
     );
 });
 
