@@ -55,7 +55,7 @@ export default function Home() {
     const payload = {
       title: "Good Vibes ✨",
       body: randomMessage,
-      icon: "/icon192.png",
+      icon: "/icons/icon192.png",
       url: "/"
     };
 

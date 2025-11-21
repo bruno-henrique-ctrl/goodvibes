@@ -1,29 +1,28 @@
-self.addEventListener('push', (e) => {
-    console.log("📩 PUSH RECEBIDO NO SERVICE WORKER");
+self.addEventListener("push", (e) => {
+    console.log("📩 PUSH RECEBIDO");
 
     let data = {};
+
     try {
         data = e.data.json();
-        console.log("📦 DADOS DO PUSH:", data);
-    } catch {
-        console.log("⚠️ Erro ao ler o payload");
+        console.log("📦 JSON:", data);
+    } catch (error) {
+        const text = e.data.text();
+        console.log("⚠️ TEXTO SIMPLES:", text);
+
+        data = {
+            title: "Nova Notificação",
+            body: text
+        };
     }
 
-    const title = data.title || "Sem título";
-    const body = data.body || "Sem mensagem";
-    const icon = data.icon || "/icon192.png";
-    const url = data.url || "/";
-
-    e.waitUntil(
-        self.registration.showNotification(title, {
-            body,
-            icon,
-            data: { url }
-        })
-    );
-
-    console.log("🔔 Notificação exibida");
+    self.registration.showNotification(data.title, {
+        body: data.body,
+        icon: data.icon || "/icons/icon192.png",
+        data: { url: data.url || "/" }
+    });
 });
+
 
 self.addEventListener('notificationclick', (e) => {
     e.notification.close();
