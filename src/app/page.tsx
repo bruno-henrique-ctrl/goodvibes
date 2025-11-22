@@ -41,6 +41,12 @@ export default function Home() {
       });
 
       setSubscription(sub);
+
+      await fetch("/api/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(sub.toJSON()),
+      });
       console.log("Subscrição criada:", sub);
     } catch (err) {
       console.error("Erro ao pedir permissão:", err);
