@@ -1,18 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { promises as fs } from "fs";
-import path from "path";
+import { Redis } from "@upstash/redis";
 import webPush from "web-push";
 
-const FILE = path.join(process.cwd(), "subscriptions.json");
-
-interface PushSubscriptionJSON {
-    endpoint: string;
-    expirationTime: number | null;
-    keys: {
-        p256dh: string;
-        auth: string;
-    };
-}
+const redis = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL!,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+});
 
 webPush.setVapidDetails(
     "mailto:seuemail@gmail.com",
@@ -21,7 +14,6 @@ webPush.setVapidDetails(
 );
 
 export async function GET(req: NextRequest) {
-    // 1️⃣ Autenticação do CRON
     const auth = req.headers.get("Authorization");
     const expected = `Bearer ${process.env.CRON_SECRET}`;
 
@@ -29,11 +21,8 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // 2️⃣ Carregar subscriptions
-    const file = await fs.readFile(FILE, "utf8");
-    const subs = JSON.parse(file) as PushSubscriptionJSON[];
+    const subs = await redis.smembers("subscriptions");
 
-    // 3️⃣ Mensagem a enviar
     const payload = JSON.stringify({
         title: "Mensagem diária ☀️",
         body: "Bom dia! São 10h da manhã!",
@@ -41,10 +30,10 @@ export async function GET(req: NextRequest) {
         url: "/",
     });
 
-    // 4️⃣ Enviar push para todos
     for (const sub of subs) {
         try {
-            await webPush.sendNotification(sub, payload);
+            const parsed = JSON.parse(sub);
+            await webPush.sendNotification(parsed, payload);
         } catch (err) {
             console.error("Erro ao enviar push:", err);
         }

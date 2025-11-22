@@ -6,9 +6,9 @@ self.addEventListener("push", (e) => {
     try {
         data = e.data.json();
         console.log("📦 JSON:", data);
-    } catch (error) {
+    } catch (err) {
         const text = e.data.text();
-        console.log("⚠️ TEXTO SIMPLES:", text);
+        console.log("⚠️ TEXTO SIMPLES:", text, err);
 
         data = {
             title: "Nova Notificação",
@@ -43,7 +43,7 @@ self.addEventListener("notificationclick", (e) => {
 });
 
 self.addEventListener("install", (event) => {
-    console.log("SW instalado");
+    console.log("SW instalado", event);
     self.skipWaiting();
 });
 
