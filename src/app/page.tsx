@@ -35,10 +35,14 @@ export default function Home() {
 
       const register = await navigator.serviceWorker.ready;
 
-      const sub = await register.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: push(vapidKey),
-      });
+      let sub = await register.pushManager.getSubscription();
+
+      if (!sub) {
+        sub = await register.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: push(vapidKey),
+        });
+      }
 
       setSubscription(sub);
 
