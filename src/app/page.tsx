@@ -111,7 +111,7 @@ export default function Home() {
     <main className="min-h-screen bg-gradient-to-br from-pink-200 via-purple-200 to-blue-200 flex flex-col items-center justify-start p-6">
       <h1 className="text-4xl md:text-5xl font-bold text-purple-700 mb-6 text-center">Ola, {nome ? nome.toUpperCase() : 'Que bom ter você aqui'} ✨</h1>
 
-      <div className="flex flex-wrap gap-4 mb-6">
+      <div className="flex flex-wrap gap-4 mb-6 justify-center">
         <button
           className="px-4 py-2 bg-purple-500 text-white rounded-lg shadow hover:bg-purple-600 transition"
           type="button"
@@ -186,12 +186,14 @@ export default function Home() {
         </details>
       )}
 
-      <div className="w-full max-w-md mb-6">
+      <div className="w-full max-w-md mb-6 mx-auto">
+        <label className="block text-sm md:text-base font-semibold text-purple-700 mb-2">
+          Conte um pouco de como você está hoje:
+        </label>
         <input
           className="w-full px-4 py-2 border rounded-lg text-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400"
           type="text"
-          placeholder="Como você está hoje?"
-          value={humor}
+          placeholder="Escreva seu humor ou sentimentos..."
           onChange={e => setHumor(e.target.value)}
         />
       </div>
