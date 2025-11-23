@@ -20,10 +20,8 @@ export default function Home() {
   useEffect(() => {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js")
-        .then((reg) => {
-          console.log("✅ SW registrado:", reg)
-          reg.pushManager.getSubscription().then(sub => setSubscription(sub));
-        })
+        .then((reg) => reg.pushManager.getSubscription())
+        .then(sub => setSubscription(sub))
         .catch((err) => console.error("❌ Falha ao registrar SW:", err));
     }
   }, []);
@@ -37,15 +35,11 @@ export default function Home() {
       }
 
       const register = await navigator.serviceWorker.ready;
-
-      let sub = await register.pushManager.getSubscription();
-
-      if (!sub) {
-        sub = await register.pushManager.subscribe({
+      const sub = await register.pushManager.getSubscription() ||
+        await register.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: push(vapidKey),
         });
-      }
 
       setSubscription(sub);
 
@@ -62,29 +56,28 @@ export default function Home() {
 
   const enviarGoodVibes = async () => {
     if (!subscription) return;
-    console.log("Enviando Good Vibes...");
+
     const randomMessage = goodVibesMessages[Math.floor(Math.random() * goodVibesMessages.length)];
 
-    const payload = {
-      title: "Good Vibes ✨",
+    const payload = JSON.stringify({
+      title: "Good Vibes ",
       body: randomMessage,
       icon: "/icons/icon192.png",
       url: "/"
-    };
-
-    await fetch("/api/notify", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        subscription: subscription.toJSON(),
-        payload
-      }),
     });
 
+    console.log("Enviando:", subscription.toJSON(), payload);
+
+    const res = await fetch("/api/notify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ subscription: subscription.toJSON(), payload }),
+    });
+
+    const txt = await res.text();
+    console.log("📩 RESPOSTA DO BACK:", txt);
 
     setGoodVibes(randomMessage);
-
-    console.log("Good Vibes enviada:", payload.body);
   };
 
   return (

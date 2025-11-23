@@ -9,17 +9,27 @@ webPush.setVapidDetails(
 );
 
 export async function POST(req: Request) {
-    const { subscription, payload } = await req.json();
+    console.log("📩 Recebendo push...");
 
-    console.log("📬 Recebido:", { subscription, payload });
+    let body;
 
     try {
-        await webPush.sendNotification(subscription, JSON.stringify(payload));
+        body = await req.json();
+    } catch (err) {
+        console.error("❌ Erro ao ler body:", err);
+        return Response.json({ error: "Body inválido" }, { status: 400 });
+    }
 
-        console.log("✅ Push enviado com sucesso!");
+    const { subscription, payload } = body;
+
+    console.log("📬 Recebido:", body);
+
+    try {
+        await webPush.sendNotification(subscription, payload);
         return Response.json({ ok: true });
     } catch (err) {
-        console.error("❌ Erro ao enviar push:", err);
-        return Response.json({ error: "Falha ao enviar notificação" }, { status: 500 });
+        console.error("❌ Erro ao enviar push (detalhes):", err);
+        return Response.json({ error: String(err) }, { status: 500 });
     }
+
 }
