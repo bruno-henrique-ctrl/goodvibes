@@ -15,6 +15,7 @@ export default function Home() {
   const [preferences, setPreferences] = useState("");
   const [mensagem, setMensagem] = useState("");
   const [userId, setUserId] = useState<string>("");
+  const [loadingMensagem, setLoadingMensagem] = useState(false);
 
   useEffect(() => {
     const init = async () => {
@@ -85,25 +86,34 @@ export default function Home() {
   const enviarMensagem = async () => {
     await salvarPerfil();
 
-    const res = await fetch(`/api/generate?id=${userId}`);
-    const data = await res.json();
+    setLoadingMensagem(true); // inicia carregamento da mensagem
 
-    if (!subscription) return;
+    try {
+      const res = await fetch(`/api/generate?id=${userId}`);
+      const data = await res.json();
 
-    const payload = JSON.stringify({
-      title: `Olá, ${nome}! ✨`,
-      body: data.message,
-      icon: "/icons/icon192.png",
-      url: "/"
-    });
+      if (!subscription) return;
 
-    await fetch("/api/notify", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ subscription: subscription.toJSON(), payload }),
-    });
+      const payload = JSON.stringify({
+        title: `Olá, ${nome}! ✨`,
+        body: data.message,
+        icon: "/icons/icon192.png",
+        url: "/"
+      });
 
-    setMensagem(data.message);
+      await fetch("/api/notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subscription: subscription.toJSON(), payload }),
+      });
+
+      setMensagem(data.message);
+    } catch (err) {
+      console.error(err);
+      setMensagem("Erro ao carregar a mensagem. Tente novamente.");
+    } finally {
+      setLoadingMensagem(false);
+    }
   };
 
   return (
@@ -120,65 +130,75 @@ export default function Home() {
         </button>
       </div>
 
-      {nome && (
-        <details className="w-full max-w-md text-purple-700 bg-white p-4 rounded-xl shadow-md mb-6">
-          <summary className="font-semibold cursor-cursor-pointer">Perfil</summary>
-          <p className="mt-2">
-            <input
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-purple-700"
-              type="text"
-              placeholder="Seu nome"
-              value={nome}
-              onChange={e => setNome(e.target.value)}
-            />
-          </p>
-          <p>
-            <input
-              className="w-full px-4 py-2 border rounded-lg text-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400"
-              type="text"
-              placeholder="Como você está hoje?"
-              value={humor}
-              onChange={e => setHumor(e.target.value)}
-            />
-          </p>
+      <details className="w-full max-w-md text-purple-700 bg-white p-4 rounded-xl shadow-md mb-6">
+        <summary className="font-semibold cursor-cursor-pointer">Perfil (adicione suas informações)</summary>
+        <p className="mt-2">
+          <input
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-purple-700"
+            type="text"
+            placeholder="Seu nome"
+            value={nome}
+            onChange={e => setNome(e.target.value)}
+          />
+        </p>
+        <p>
+          <input
+            className="w-full px-4 py-2 border rounded-lg text-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400"
+            type="text"
+            placeholder="Como voce esta?"
+            value={humor}
+            onChange={e => setHumor(e.target.value)}
+          />
+        </p>
 
-          <p>
-            <input
-              className="w-full px-4 py-2 border rounded-lg text-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400"
-              type="text"
-              placeholder="Seus hobbies (opcionais)"
-              value={hobbies}
-              onChange={e => setHobbies(e.target.value)}
-            />
-          </p>
-          <p>
-            <input
-              className="w-full px-4 py-2 border rounded-lg text-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400"
-              type="text"
-              placeholder="Seus objetivos (opcionais)"
-              value={goals}
-              onChange={e => setGoals(e.target.value)}
-            />
-          </p>
-          <p>
-            <input
-              className="w-full px-4 py-2 border rounded-lg text-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400"
-              type="text"
-              placeholder="Suas preferências (opcionais)"
-              value={preferences}
-              onChange={e => setPreferences(e.target.value)}
-            />
-          </p>
+        <p>
+          <input
+            className="w-full px-4 py-2 border rounded-lg text-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400"
+            type="text"
+            placeholder="Seus hobbies (opcionais)"
+            value={hobbies}
+            onChange={e => setHobbies(e.target.value)}
+          />
+        </p>
+        <p>
+          <input
+            className="w-full px-4 py-2 border rounded-lg text-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400"
+            type="text"
+            placeholder="Seus objetivos (opcionais)"
+            value={goals}
+            onChange={e => setGoals(e.target.value)}
+          />
+        </p>
+        <p>
+          <input
+            className="w-full px-4 py-2 border rounded-lg text-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400"
+            type="text"
+            placeholder="Suas preferências (opcionais)"
+            value={preferences}
+            onChange={e => setPreferences(e.target.value)}
+          />
+        </p>
 
-          <button
-            className="w-full px-4 py-2 cursor-pointer bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition"
-            type="button"
-            onClick={salvarPerfil}
-          >
-            Salvar Perfil
-          </button>
-        </details>
-      )}
+        <button
+          className="w-full px-4 py-2 cursor-pointer bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition"
+          type="button"
+          onClick={salvarPerfil}
+        >
+          Salvar Perfil
+        </button>
+      </details>
+
+      <div className="w-full max-w-md mb-6 mx-auto">
+        <p className="mt-2">
+          <input
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-purple-700"
+            type="text"
+            placeholder="Seu nome"
+            value={nome}
+            onChange={e => setNome(e.target.value)}
+          />
+        </p>
+      </div>
 
       <div className="w-full max-w-md mb-6 mx-auto">
         <label className="block text-center text-3x1 md:text-base font-semibold text-purple-700 mb-2">
@@ -201,11 +221,16 @@ export default function Home() {
         Receber Mensagem
       </button>
 
-      {mensagem && (
+      {loadingMensagem ? (
+        <div className="w-full max-w-xl bg-white p-6 rounded-2xl shadow-lg border-t-4 border-yellow-400 text-center">
+          <p className="text-lg md:text-xl text-gray-800">Carregando mensagem... ✨</p>
+        </div>
+      ) : mensagem ? (
         <div className="w-full max-w-xl bg-white p-6 rounded-2xl shadow-lg border-t-4 border-yellow-400">
           <p className="text-lg md:text-xl text-gray-800">{mensagem}</p>
         </div>
-      )}
+      ) : null}
+
     </main>
   );
 }
