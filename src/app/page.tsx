@@ -143,15 +143,6 @@ export default function Home() {
             onChange={e => setNome(e.target.value)}
           />
         </p>
-        <p>
-          <input
-            className="w-full px-4 py-2 border rounded-lg text-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400"
-            type="text"
-            placeholder="Como voce esta?"
-            value={humor}
-            onChange={e => setHumor(e.target.value)}
-          />
-        </p>
 
         <p>
           <input
