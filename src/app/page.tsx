@@ -30,19 +30,24 @@ export default function Home() {
 
 
   useEffect(() => {
+
+    let id = ''
     const init = async () => {
       const saved = localStorage.getItem("userProfile");
       if (saved) {
         const profile = JSON.parse(saved);
-        setUserId(profile.id || uuidv4());
+        id = profile.id || uuidv4();
         setNome(profile.name || "");
         setHumor(profile.mood || "");
         setHobbies((profile.hobbies || []).join(", "));
         setGoals((profile.goals || []).join(", "));
         setPreferences((profile.preferences || []).join(", "));
       } else {
-        setUserId(uuidv4());
+        id = uuidv4();
       }
+      setUserId(id);
+
+      localStorage
 
       if ("serviceWorker" in navigator) {
         try {
@@ -88,10 +93,16 @@ export default function Home() {
 
     setSubscription(sub);
 
+    const idToSave = userId || uuidv4();
+    setUserId(idToSave);
+
     await fetch("/api/save", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(sub.toJSON()),
+      body: JSON.stringify({
+        userId: idToSave,
+        sub: sub.toJSON()
+      }),
     });
   };
 

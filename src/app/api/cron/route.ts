@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Redis } from "@upstash/redis";
-import webPush from "web-push";
+import webPush, { PushSubscription } from "web-push";
 
 const redis = new Redis({
     url: process.env.UPSTASH_REDIS_REST_URL!,
@@ -20,11 +20,8 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Recupera todas as subscriptions do Redis
     const subs = await redis.smembers("subscriptions");
 
-    // Aqui você poderia gerar a mensagem dinamicamente
-    // Como no botão, você poderia chamar a mesma API /api/generate
     const payloadBase = {
         title: "Mensagem diária ☀️",
         icon: "/icons/icon192.png",
@@ -33,19 +30,17 @@ export async function GET(req: NextRequest) {
 
     for (const sub of subs) {
         try {
-            // Se quiser gerar uma mensagem para cada usuário, chamaria /api/generate?id=USER_ID
-            const id = sub.split(":")[1];
-            const res = await fetch(`/api/generate?id=${id}`);
+            const parsed: { userId: string; sub: PushSubscription } = JSON.parse(sub);
+
+            const res = await fetch(`/api/generate?id=${parsed.userId}`);
             const data = await res.json();
 
-            // Mas se for uma mensagem padrão, pode usar assim:
             const payload = JSON.stringify({
                 ...payloadBase,
                 body: data.message || "Bom dia! Que seu dia seja incrível! ✨",
             });
 
-            const parsed = typeof sub === "string" ? JSON.parse(sub) : sub;
-            await webPush.sendNotification(parsed, payload);
+            await webPush.sendNotification(parsed.sub, payload);
         } catch (err) {
             console.error("Erro ao enviar push:", err, "SUB:", sub);
         }
