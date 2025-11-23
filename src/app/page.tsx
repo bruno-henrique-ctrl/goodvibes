@@ -86,7 +86,7 @@ export default function Home() {
   const enviarMensagem = async () => {
     await salvarPerfil();
 
-    setLoadingMensagem(true); // inicia carregamento da mensagem
+    setLoadingMensagem(true);
 
     try {
       const res = await fetch(`/api/generate?id=${userId}`);

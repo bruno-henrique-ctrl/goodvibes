@@ -34,10 +34,14 @@ export async function GET(req: NextRequest) {
     for (const sub of subs) {
         try {
             // Se quiser gerar uma mensagem para cada usuário, chamaria /api/generate?id=USER_ID
+            const id = sub.split(":")[1];
+            const res = await fetch(`/api/generate?id=${id}`);
+            const data = await res.json();
+
             // Mas se for uma mensagem padrão, pode usar assim:
             const payload = JSON.stringify({
                 ...payloadBase,
-                body: "Bom dia! Que seu dia seja incrível! ✨",
+                body: data.message || "Bom dia! Que seu dia seja incrível! ✨",
             });
 
             const parsed = typeof sub === "string" ? JSON.parse(sub) : sub;
