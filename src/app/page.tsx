@@ -14,7 +14,6 @@ export default function Home() {
   const [goals, setGoals] = useState("");
   const [preferences, setPreferences] = useState("");
   const [mensagem, setMensagem] = useState("");
-  const [editar, setEditar] = useState(false);
   const [userId, setUserId] = useState<string>("");
 
   useEffect(() => {
@@ -113,14 +112,7 @@ export default function Home() {
 
       <div className="flex flex-wrap gap-4 mb-6 justify-center">
         <button
-          className="px-4 py-2 bg-purple-500 text-white rounded-lg shadow hover:bg-purple-600 transition"
-          type="button"
-          onClick={() => setEditar(!editar)}
-        >
-          {editar ? "Fechar Perfil" : "Editar ou criar Perfil"}
-        </button>
-        <button
-          className="px-4 py-2 bg-green-500 text-white rounded-lg shadow hover:bg-green-600 transition"
+          className="px-4 py-2 cursor-pointer bg-green-500 text-white rounded-lg shadow hover:bg-green-600 transition"
           type="button"
           onClick={pedirPermissao}
         >
@@ -128,66 +120,68 @@ export default function Home() {
         </button>
       </div>
 
-      {editar && (
-        <div className="w-full max-w-md bg-white p-6 rounded-xl shadow-lg mb-6 space-y-4">
-          <input
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-purple-700"
-            type="text"
-            placeholder="Seu nome"
-            value={nome}
-            onChange={e => setNome(e.target.value)}
-          />
-          <input
-            className="w-full px-4 py-2 border rounded-lg text-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400"
-            type="text"
-            placeholder="Como você está hoje?"
-            value={humor}
-            onChange={e => setHumor(e.target.value)}
-          />
-          <input
-            className="w-full px-4 py-2 border rounded-lg text-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400"
-            type="text"
-            placeholder="Seus hobbies (opcionais)"
-            value={hobbies}
-            onChange={e => setHobbies(e.target.value)}
-          />
-          <input
-            className="w-full px-4 py-2 border rounded-lg text-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400"
-            type="text"
-            placeholder="Seus objetivos (opcionais)"
-            value={goals}
-            onChange={e => setGoals(e.target.value)}
-          />
-          <input
-            className="w-full px-4 py-2 border rounded-lg text-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400"
-            type="text"
-            placeholder="Suas preferências (opcionais)"
-            value={preferences}
-            onChange={e => setPreferences(e.target.value)}
-          />
+      {nome && (
+        <details className="w-full max-w-md text-purple-700 bg-white p-4 rounded-xl shadow-md mb-6">
+          <summary className="font-semibold cursor-cursor-pointer">Perfil</summary>
+          <p className="mt-2">
+            <input
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-purple-700"
+              type="text"
+              placeholder="Seu nome"
+              value={nome}
+              onChange={e => setNome(e.target.value)}
+            />
+          </p>
+          <p>
+            <input
+              className="w-full px-4 py-2 border rounded-lg text-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400"
+              type="text"
+              placeholder="Como você está hoje?"
+              value={humor}
+              onChange={e => setHumor(e.target.value)}
+            />
+          </p>
+
+          <p>
+            <input
+              className="w-full px-4 py-2 border rounded-lg text-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400"
+              type="text"
+              placeholder="Seus hobbies (opcionais)"
+              value={hobbies}
+              onChange={e => setHobbies(e.target.value)}
+            />
+          </p>
+          <p>
+            <input
+              className="w-full px-4 py-2 border rounded-lg text-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400"
+              type="text"
+              placeholder="Seus objetivos (opcionais)"
+              value={goals}
+              onChange={e => setGoals(e.target.value)}
+            />
+          </p>
+          <p>
+            <input
+              className="w-full px-4 py-2 border rounded-lg text-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400"
+              type="text"
+              placeholder="Suas preferências (opcionais)"
+              value={preferences}
+              onChange={e => setPreferences(e.target.value)}
+            />
+          </p>
+
           <button
-            className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition"
+            className="w-full px-4 py-2 cursor-pointer bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition"
             type="button"
             onClick={salvarPerfil}
           >
             Salvar Perfil
           </button>
-        </div>
-      )}
-
-      {nome && (
-        <details className="w-full max-w-md text-purple-700 bg-white p-4 rounded-xl shadow-md mb-6">
-          <summary className="font-semibold cursor-pointer">Perfil</summary>
-          <p className="mt-2"><strong>Nome:</strong> {nome}</p>
-          <p><strong>Humor:</strong> {humor}</p>
-          <p><strong>Hobbies:</strong> {hobbies}</p>
-          <p><strong>Objetivos:</strong> {goals}</p>
-          <p><strong>Preferências:</strong> {preferences}</p>
         </details>
       )}
 
       <div className="w-full max-w-md mb-6 mx-auto">
-        <label className="block text-sm md:text-base font-semibold text-purple-700 mb-2">
+        <label className="block text-center text-3x1 md:text-base font-semibold text-purple-700 mb-2">
           Conte um pouco de como você está hoje:
         </label>
         <input
@@ -199,7 +193,7 @@ export default function Home() {
       </div>
 
       <button
-        className="px-6 py-3 bg-yellow-400 text-white font-bold rounded-xl shadow-lg hover:bg-yellow-500 transition mb-6"
+        className="px-6 py-3 cursor-pointer bg-yellow-400 text-white font-bold rounded-xl shadow-lg hover:bg-yellow-500 transition mb-6"
         type="button"
         onClick={enviarMensagem}
         disabled={!subscription}
