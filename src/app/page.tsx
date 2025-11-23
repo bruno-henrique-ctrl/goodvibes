@@ -5,97 +5,144 @@ import { push } from "@/_utils/push";
 
 const vapidKey = process.env.NEXT_PUBLIC_VAPID_KEY as string;
 
-const goodVibesMessages = [
-  "✨ Hoje é um ótimo dia para sorrir!",
-  "💪 Continue firme, você consegue!",
-  "🌸 Pequenos passos levam a grandes conquistas!",
-  "☀️ Boa energia te cerca hoje!",
-  "🌈 Um sorriso muda o dia de alguém!"
-];
-
 export default function Home() {
   const [subscription, setSubscription] = useState<PushSubscription | null>(null);
-  const [goodVibes, setGoodVibes] = useState<string | null>(null);
+  const [nome, setNome] = useState("");
+  const [humor, setHumor] = useState("");
+  const [hobbies, setHobbies] = useState("");
+  const [goals, setGoals] = useState("");
+  const [preferences, setPreferences] = useState("");
+  const [mensagem, setMensagem] = useState("");
+
+  const [editar, setEditar] = useState(false);
+
+  const userId = "user-123";
 
   useEffect(() => {
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js")
-        .then((reg) => reg.pushManager.getSubscription())
-        .then(sub => setSubscription(sub))
-        .catch((err) => console.error("❌ Falha ao registrar SW:", err));
-    }
-  }, []);
-
-  const pedirPermissao = async () => {
-    console.log("Botão clicado");
-    try {
-      if (!("serviceWorker" in navigator)) {
-        console.log("Service worker não suportado");
-        return;
+    const init = async () => {
+      const saved = localStorage.getItem("userProfile");
+      if (saved) {
+        const profile = JSON.parse(saved);
+        setNome(profile.name || "");
+        setHumor(profile.mood || "");
+        setHobbies((profile.hobbies || []).join(", "));
+        setGoals((profile.goals || []).join(", "));
+        setPreferences((profile.preferences || []).join(", "));
       }
 
-      const register = await navigator.serviceWorker.ready;
-      const sub = await register.pushManager.getSubscription() ||
-        await register.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: push(vapidKey),
-        });
-
-      setSubscription(sub);
-
-      await fetch("/api/save", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(sub.toJSON()),
-      });
-      console.log("Subscrição criada:", sub);
-    } catch (err) {
-      console.error("Erro ao pedir permissão:", err);
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/sw.js")
+          .then(reg => reg.pushManager.getSubscription())
+          .then(sub => setSubscription(sub))
+          .catch(err => console.error(err));
+      }
     }
+    init()
+  }, []);
+
+  const salvarPerfil = async () => {
+    const profile = {
+      id: userId,
+      name: nome,
+      hobbies: hobbies.split(",").map(h => h.trim()),
+      goals: goals.split(",").map(g => g.trim()),
+      preferences: preferences.split(",").map(p => p.trim()),
+      mood: humor
+    };
+
+    await fetch("/api/profile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(profile)
+    });
+
+    localStorage.setItem("userProfile", JSON.stringify(profile));
   };
 
-  const enviarGoodVibes = async () => {
+  const pedirPermissao = async () => {
+    if (!("serviceWorker" in navigator)) return;
+
+    const register = await navigator.serviceWorker.ready;
+    const sub = await register.pushManager.getSubscription() ||
+      await register.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: push(vapidKey),
+      });
+
+    setSubscription(sub);
+
+    await fetch("/api/save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(sub.toJSON()),
+    });
+  };
+
+  const enviarMensagem = async () => {
+    await salvarPerfil();
+
+    const res = await fetch(`/api/generate?id=${userId}`);
+    const data = await res.json();
+
     if (!subscription) return;
 
-    const randomMessage = goodVibesMessages[Math.floor(Math.random() * goodVibesMessages.length)];
-
     const payload = JSON.stringify({
-      title: "Good Vibes ",
-      body: randomMessage,
+      title: `Olá, ${nome}! ✨`,
+      body: data.message,
       icon: "/icons/icon192.png",
       url: "/"
     });
 
-    console.log("Enviando:", subscription.toJSON(), payload);
-
-    const res = await fetch("/api/notify", {
+    await fetch("/api/notify", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ subscription: subscription.toJSON(), payload }),
     });
 
-    const txt = await res.text();
-    console.log("📩 RESPOSTA DO BACK:", txt);
-
-    setGoodVibes(randomMessage);
+    setMensagem(data.message);
   };
 
   return (
     <main>
-      <h1>PWA</h1>
-      <button type="button" onClick={pedirPermissao}>
-        Permitir Notificações
-      </button>
+      <h1>Good Vibes PWA</h1>
 
-      <button type="button" onClick={enviarGoodVibes} disabled={!subscription}>
-        Enviar Good Vibes
-      </button>
+      <div>
+        {!editar
+          ? <button type="button" onClick={() => setEditar(!editar)}>Editar ou criar Perfil</button>
+          : <button type="button" onClick={() => setEditar(!editar)}>Fechar Perfil</button>
+        }
+        <button type="button" onClick={pedirPermissao}>Permitir Notificações</button>
+      </div>
 
-      <p>{goodVibes}</p>
-
-      {subscription && (
-        <pre>{JSON.stringify(subscription.toJSON(), null, 2)}</pre>
+      {editar && (
+        <div>
+          <input type="text" placeholder="Seu nome" value={nome} onChange={e => setNome(e.target.value)} />
+          <input type="text" placeholder="Como você está hoje?" value={humor} onChange={e => setHumor(e.target.value)} />
+          <input type="text" placeholder="Seus hobbies (separados por vírgula)" value={hobbies} onChange={e => setHobbies(e.target.value)} />
+          <input type="text" placeholder="Seus objetivos (separados por vírgula)" value={goals} onChange={e => setGoals(e.target.value)} />
+          <input type="text" placeholder="Suas preferências (separadas por vírgula)" value={preferences} onChange={e => setPreferences(e.target.value)} />
+          <button type="button" onClick={salvarPerfil}>Salvar Perfil</button>
+        </div>
       )}
+
+      {nome && (
+        <details>
+          <summary>Perfil</summary>
+          <p>Nome: {nome}</p>
+          <p>Humor: {humor}</p>
+          <p>Hobbies: {hobbies}</p>
+          <p>Objetivos: {goals}</p>
+          <p>Preferências: {preferences}</p>
+        </details>
+      )}
+
+      {nome && <h2>Olá, {nome}</h2>}
+
+      <h3>Como voce está hoje?</h3>
+      <input type="text" placeholder="Como você está hoje?" value={humor} onChange={e => setHumor(e.target.value)} />
+
+      <button type="button" onClick={enviarMensagem} disabled={!subscription}>Receber Mensagem</button>
+      {mensagem && <h2>{mensagem}</h2>}
     </main>
   );
 }

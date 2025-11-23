@@ -9,8 +9,6 @@ webPush.setVapidDetails(
 );
 
 export async function POST(req: Request) {
-    console.log("📩 Recebendo push...");
-
     let body;
 
     try {
@@ -21,8 +19,6 @@ export async function POST(req: Request) {
     }
 
     const { subscription, payload } = body;
-
-    console.log("📬 Recebido:", body);
 
     try {
         await webPush.sendNotification(subscription, payload);

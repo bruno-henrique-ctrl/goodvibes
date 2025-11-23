@@ -15,7 +15,6 @@ webPush.setVapidDetails(
 );
 
 export async function GET(req: NextRequest) {
-    // segurança do cron (opcional)
     const auth = req.headers.get("Authorization");
     const expected = `Bearer ${process.env.CRON_SECRET}`;
 

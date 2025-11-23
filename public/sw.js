@@ -1,6 +1,4 @@
 self.addEventListener("push", (e) => {
-    console.log("📩 PUSH RECEBIDO");
-
     let data = {};
 
     try {
@@ -9,15 +7,14 @@ self.addEventListener("push", (e) => {
         }
 
         data = e.data.json();
-        console.log("📦 JSON:", data);
     } catch (err) {
         const text = e.data.text();
-        console.log("⚠️ TEXTO SIMPLES:", text, err);
 
         data = {
             title: "Nova Notificação",
             body: text
         };
+        console.error("❌ Erro ao ler push:", err);
     }
 
     self.registration.showNotification(data.title, {
@@ -45,16 +42,3 @@ self.addEventListener("notificationclick", (e) => {
             })
     );
 });
-
-self.addEventListener("install", (event) => {
-    console.log("SW instalado", event);
-});
-
-self.addEventListener("activate", (event) => {
-    console.log("SW ativado", event);
-});
-
-self.addEventListener("fetch", (event) => {
-    console.log("Interceptando fetch:", event.request.url);
-});
-
