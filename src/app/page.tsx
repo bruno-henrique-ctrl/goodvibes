@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { push } from "@/_utils/push";
 
-const vapidKey = process.env.NEXT_PUBLIC_VAPID_KEY as string;
+const vapidKey = process.env.NEXT_PUBLIC_VAPID_KEY!;
 
 const goodVibesMessages = [
   "✨ Hoje é um ótimo dia para sorrir!",
