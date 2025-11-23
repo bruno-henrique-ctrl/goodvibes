@@ -44,12 +44,10 @@ self.addEventListener("notificationclick", (e) => {
 
 self.addEventListener("install", (event) => {
     console.log("SW instalado", event);
-    self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
-    console.log("SW ativado");
-    event.waitUntil(clients.claim());
+    console.log("SW ativado", event);
 });
 
 self.addEventListener("fetch", (event) => {
