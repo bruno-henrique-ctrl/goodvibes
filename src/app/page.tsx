@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { push } from "@/_utils/push";
+import { v4 as uuidv4 } from "uuid";
 
 const vapidKey = process.env.NEXT_PUBLIC_VAPID_KEY as string;
 
@@ -13,31 +14,35 @@ export default function Home() {
   const [goals, setGoals] = useState("");
   const [preferences, setPreferences] = useState("");
   const [mensagem, setMensagem] = useState("");
-
   const [editar, setEditar] = useState(false);
-
-  const userId = "user-123";
+  const [userId, setUserId] = useState<string>("");
 
   useEffect(() => {
     const init = async () => {
       const saved = localStorage.getItem("userProfile");
       if (saved) {
         const profile = JSON.parse(saved);
+        setUserId(profile.id || uuidv4());
         setNome(profile.name || "");
         setHumor(profile.mood || "");
         setHobbies((profile.hobbies || []).join(", "));
         setGoals((profile.goals || []).join(", "));
         setPreferences((profile.preferences || []).join(", "));
+      } else {
+        setUserId(uuidv4());
       }
 
       if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("/sw.js")
-          .then(reg => reg.pushManager.getSubscription())
-          .then(sub => setSubscription(sub))
-          .catch(err => console.error(err));
+        try {
+          const reg = await navigator.serviceWorker.register("/sw.js");
+          const sub = await reg.pushManager.getSubscription();
+          setSubscription(sub);
+        } catch (err) {
+          console.error(err);
+        }
       }
-    }
-    init()
+    };
+    init();
   }, []);
 
   const salvarPerfil = async () => {
@@ -108,8 +113,8 @@ export default function Home() {
 
       <div>
         {!editar
-          ? <button type="button" onClick={() => setEditar(!editar)}>Editar ou criar Perfil</button>
-          : <button type="button" onClick={() => setEditar(!editar)}>Fechar Perfil</button>
+          ? <button type="button" onClick={() => setEditar(true)}>Editar ou criar Perfil</button>
+          : <button type="button" onClick={() => setEditar(false)}>Fechar Perfil</button>
         }
         <button type="button" onClick={pedirPermissao}>Permitir Notificações</button>
       </div>
@@ -136,9 +141,9 @@ export default function Home() {
         </details>
       )}
 
-      {nome && <h2>Olá, {nome}</h2>}
+      {nome && <h2>Olá, {nome}</h2>}
 
-      <h3>Como voce está hoje?</h3>
+      <h3>Como você está hoje?</h3>
       <input type="text" placeholder="Como você está hoje?" value={humor} onChange={e => setHumor(e.target.value)} />
 
       <button type="button" onClick={enviarMensagem} disabled={!subscription}>Receber Mensagem</button>
