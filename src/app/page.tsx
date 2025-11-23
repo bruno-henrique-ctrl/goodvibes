@@ -18,6 +18,18 @@ export default function Home() {
   const [loadingMensagem, setLoadingMensagem] = useState(false);
 
   useEffect(() => {
+    const handler = async () => {
+      if (Notification.permission === "default") {
+        await pedirPermissao();
+      }
+      window.removeEventListener("click", handler);
+    };
+
+    window.addEventListener("click", handler);
+  }, []);
+
+
+  useEffect(() => {
     const init = async () => {
       const saved = localStorage.getItem("userProfile");
       if (saved) {
@@ -119,16 +131,6 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-pink-200 via-purple-200 to-blue-200 flex flex-col items-center justify-start p-6">
       <h1 className="text-4xl md:text-5xl font-bold text-purple-700 mb-6 text-center">Ola, {nome ? nome.toUpperCase() : 'Que bom ter você aqui'} ✨</h1>
-
-      <div className="flex flex-wrap gap-4 mb-6 justify-center">
-        <button
-          className="px-4 py-2 cursor-pointer bg-green-500 text-white rounded-lg shadow hover:bg-green-600 transition"
-          type="button"
-          onClick={pedirPermissao}
-        >
-          Permitir Notificações
-        </button>
-      </div>
 
       <details className="w-full max-w-md text-purple-700 bg-white p-4 rounded-xl shadow-md mb-6">
         <summary className="font-semibold cursor-cursor-pointer">Perfil (adicione suas informações)</summary>
