@@ -49,9 +49,9 @@ export default function Home() {
     const profile = {
       id: userId,
       name: nome,
-      hobbies: hobbies.split(",").map(h => h.trim()),
-      goals: goals.split(",").map(g => g.trim()),
-      preferences: preferences.split(",").map(p => p.trim()),
+      hobbies: hobbies.split(",").map(h => h.trim()).filter(h => h),
+      goals: goals.split(",").map(g => g.trim()).filter(g => g),
+      preferences: preferences.split(",").map(p => p.trim()).filter(p => p),
       mood: humor
     };
 
@@ -108,46 +108,108 @@ export default function Home() {
   };
 
   return (
-    <main>
-      <h1>Good Vibes PWA</h1>
+    <main className="min-h-screen bg-gradient-to-br from-pink-200 via-purple-200 to-blue-200 flex flex-col items-center justify-start p-6">
+      <h1 className="text-4xl md:text-5xl font-bold text-purple-700 mb-6 text-center">Ola, {nome ? nome.toUpperCase() : 'Que bom ter você aqui'} ✨</h1>
 
-      <div>
-        {!editar
-          ? <button type="button" onClick={() => setEditar(true)}>Editar ou criar Perfil</button>
-          : <button type="button" onClick={() => setEditar(false)}>Fechar Perfil</button>
-        }
-        <button type="button" onClick={pedirPermissao}>Permitir Notificações</button>
+      <div className="flex flex-wrap gap-4 mb-6">
+        <button
+          className="px-4 py-2 bg-purple-500 text-white rounded-lg shadow hover:bg-purple-600 transition"
+          type="button"
+          onClick={() => setEditar(!editar)}
+        >
+          {editar ? "Fechar Perfil" : "Editar ou criar Perfil"}
+        </button>
+        <button
+          className="px-4 py-2 bg-green-500 text-white rounded-lg shadow hover:bg-green-600 transition"
+          type="button"
+          onClick={pedirPermissao}
+        >
+          Permitir Notificações
+        </button>
       </div>
 
       {editar && (
-        <div>
-          <input type="text" placeholder="Seu nome" value={nome} onChange={e => setNome(e.target.value)} />
-          <input type="text" placeholder="Como você está hoje?" value={humor} onChange={e => setHumor(e.target.value)} />
-          <input type="text" placeholder="Seus hobbies (separados por vírgula)" value={hobbies} onChange={e => setHobbies(e.target.value)} />
-          <input type="text" placeholder="Seus objetivos (separados por vírgula)" value={goals} onChange={e => setGoals(e.target.value)} />
-          <input type="text" placeholder="Suas preferências (separadas por vírgula)" value={preferences} onChange={e => setPreferences(e.target.value)} />
-          <button type="button" onClick={salvarPerfil}>Salvar Perfil</button>
+        <div className="w-full max-w-md bg-white p-6 rounded-xl shadow-lg mb-6 space-y-4">
+          <input
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-purple-700"
+            type="text"
+            placeholder="Seu nome"
+            value={nome}
+            onChange={e => setNome(e.target.value)}
+          />
+          <input
+            className="w-full px-4 py-2 border rounded-lg text-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400"
+            type="text"
+            placeholder="Como você está hoje?"
+            value={humor}
+            onChange={e => setHumor(e.target.value)}
+          />
+          <input
+            className="w-full px-4 py-2 border rounded-lg text-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400"
+            type="text"
+            placeholder="Seus hobbies (opcionais)"
+            value={hobbies}
+            onChange={e => setHobbies(e.target.value)}
+          />
+          <input
+            className="w-full px-4 py-2 border rounded-lg text-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400"
+            type="text"
+            placeholder="Seus objetivos (opcionais)"
+            value={goals}
+            onChange={e => setGoals(e.target.value)}
+          />
+          <input
+            className="w-full px-4 py-2 border rounded-lg text-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400"
+            type="text"
+            placeholder="Suas preferências (opcionais)"
+            value={preferences}
+            onChange={e => setPreferences(e.target.value)}
+          />
+          <button
+            className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition"
+            type="button"
+            onClick={salvarPerfil}
+          >
+            Salvar Perfil
+          </button>
         </div>
       )}
 
       {nome && (
-        <details>
-          <summary>Perfil</summary>
-          <p>Nome: {nome}</p>
-          <p>Humor: {humor}</p>
-          <p>Hobbies: {hobbies}</p>
-          <p>Objetivos: {goals}</p>
-          <p>Preferências: {preferences}</p>
+        <details className="w-full max-w-md text-purple-700 bg-white p-4 rounded-xl shadow-md mb-6">
+          <summary className="font-semibold cursor-pointer">Perfil</summary>
+          <p className="mt-2"><strong>Nome:</strong> {nome}</p>
+          <p><strong>Humor:</strong> {humor}</p>
+          <p><strong>Hobbies:</strong> {hobbies}</p>
+          <p><strong>Objetivos:</strong> {goals}</p>
+          <p><strong>Preferências:</strong> {preferences}</p>
         </details>
       )}
 
-      {nome && <h2>Olá, {nome}</h2>}
+      <div className="w-full max-w-md mb-6">
+        <input
+          className="w-full px-4 py-2 border rounded-lg text-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400"
+          type="text"
+          placeholder="Como você está hoje?"
+          value={humor}
+          onChange={e => setHumor(e.target.value)}
+        />
+      </div>
 
-      <h3>Como você está hoje?</h3>
-      <input type="text" placeholder="Como você está hoje?" value={humor} onChange={e => setHumor(e.target.value)} />
+      <button
+        className="px-6 py-3 bg-yellow-400 text-white font-bold rounded-xl shadow-lg hover:bg-yellow-500 transition mb-6"
+        type="button"
+        onClick={enviarMensagem}
+        disabled={!subscription}
+      >
+        Receber Mensagem
+      </button>
 
-      <button type="button" onClick={enviarMensagem} disabled={!subscription}>Receber Mensagem</button>
-      {mensagem && <h2>{mensagem}</h2>}
+      {mensagem && (
+        <div className="w-full max-w-xl bg-white p-6 rounded-2xl shadow-lg border-t-4 border-yellow-400">
+          <p className="text-lg md:text-xl text-gray-800">{mensagem}</p>
+        </div>
+      )}
     </main>
   );
 }
