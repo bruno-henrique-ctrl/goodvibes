@@ -1,3 +1,4 @@
+// /app/api/cron/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { Redis } from "@upstash/redis";
 import webPush from "web-push";
@@ -14,6 +15,7 @@ webPush.setVapidDetails(
 );
 
 export async function GET(req: NextRequest) {
+    // segurança do cron (opcional)
     const auth = req.headers.get("Authorization");
     const expected = `Bearer ${process.env.CRON_SECRET}`;
 
@@ -35,7 +37,9 @@ export async function GET(req: NextRequest) {
             const parsed = JSON.parse(sub);
             await webPush.sendNotification(parsed, payload);
         } catch (err) {
-            console.error("Erro ao enviar push:", err);
+            console.error("Erro ao enviar push:", err, "SUB:", sub);
+
+            await redis.srem("subscriptions", sub);
         }
     }
 

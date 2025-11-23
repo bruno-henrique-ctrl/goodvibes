@@ -1,3 +1,4 @@
+// /app/api/save/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { Redis } from "@upstash/redis";
 
@@ -7,10 +8,14 @@ const redis = new Redis({
 });
 
 export async function POST(req: NextRequest) {
-    const sub = await req.json();
+    try {
+        const body = await req.json();
 
-    // evita duplicados automaticamente
-    await redis.sadd("subscriptions", sub);
+        await redis.sadd("subscriptions", JSON.stringify(body));
 
-    return NextResponse.json({ ok: true });
+        return NextResponse.json({ ok: true });
+    } catch (err) {
+        console.error("Erro ao salvar subscription:", err);
+        return NextResponse.json({ error: "Erro ao salvar" }, { status: 500 });
+    }
 }
