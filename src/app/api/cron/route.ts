@@ -48,8 +48,6 @@ export async function GET(req: NextRequest) {
             await webPush.sendNotification(parsed, payload);
         } catch (err) {
             console.error("Erro ao enviar push:", err, "SUB:", sub);
-
-            await redis.srem("subscriptions", sub);
         }
     }
 

@@ -19,14 +19,14 @@ export default function Home() {
 
   useEffect(() => {
     const handler = async () => {
-      if (Notification.permission === "default") {
+      if (Notification.permission === "default" || !subscription) {
         await pedirPermissao();
       }
       window.removeEventListener("click", handler);
     };
 
     window.addEventListener("click", handler);
-  }, []);
+  }, [subscription]);
 
 
   useEffect(() => {
