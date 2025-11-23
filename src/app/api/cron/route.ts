@@ -33,8 +33,6 @@ export async function GET(req: NextRequest) {
 
     for (const sub of subs) {
         try {
-            const parsed = JSON.parse(sub);
-
             // Se quiser gerar uma mensagem para cada usuário, chamaria /api/generate?id=USER_ID
             // Mas se for uma mensagem padrão, pode usar assim:
             const payload = JSON.stringify({
@@ -42,6 +40,7 @@ export async function GET(req: NextRequest) {
                 body: "Bom dia! Que seu dia seja incrível! ✨",
             });
 
+            const parsed = typeof sub === "string" ? JSON.parse(sub) : sub;
             await webPush.sendNotification(parsed, payload);
         } catch (err) {
             console.error("Erro ao enviar push:", err, "SUB:", sub);
