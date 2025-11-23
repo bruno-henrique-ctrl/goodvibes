@@ -4,6 +4,10 @@ self.addEventListener("push", (e) => {
     let data = {};
 
     try {
+        if (!e.data) {
+            return;
+        }
+
         data = e.data.json();
         console.log("📦 JSON:", data);
     } catch (err) {

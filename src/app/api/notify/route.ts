@@ -1,5 +1,7 @@
 import webPush from "web-push";
 
+export const runtime = "nodejs";
+
 webPush.setVapidDetails(
     "mailto:seuemail@gmail.com",
     process.env.VAPID_PUBLIC_KEY!,

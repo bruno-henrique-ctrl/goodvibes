@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { push } from "@/_utils/push";
 
-const vapidKey = process.env.NEXT_PUBLIC_VAPID_KEY!;
+const vapidKey = process.env.NEXT_PUBLIC_VAPID_KEY as string;
 
 const goodVibesMessages = [
   "✨ Hoje é um ótimo dia para sorrir!",
@@ -20,7 +20,10 @@ export default function Home() {
   useEffect(() => {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js")
-        .then((reg) => console.log("✅ SW registrado:", reg))
+        .then((reg) => {
+          console.log("✅ SW registrado:", reg)
+          reg.pushManager.getSubscription().then(sub => setSubscription(sub));
+        })
         .catch((err) => console.error("❌ Falha ao registrar SW:", err));
     }
   }, []);
