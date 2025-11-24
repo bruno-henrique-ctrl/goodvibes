@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Redis } from "@upstash/redis";
-import webPush, { PushSubscription } from "web-push";
+import webPush from "web-push";
 
 const redis = new Redis({
     url: process.env.UPSTASH_REDIS_REST_URL!,
@@ -34,6 +34,7 @@ export async function GET(req: NextRequest) {
     for (const sub of subs) {
         try {
             const msg = mensagens[Math.floor(Math.random() * mensagens.length)];
+
             const payload = JSON.stringify({
                 title: "Mensagem Diária ☀️",
                 body: msg,
@@ -41,12 +42,13 @@ export async function GET(req: NextRequest) {
                 url: "/"
             });
 
-            const subscription = JSON.parse(sub) as PushSubscription;
-            await webPush.sendNotification(subscription, payload);
+            await webPush.sendNotification(sub as any, payload);
+
         } catch (err) {
             console.error("Erro ao enviar push:", err, "SUB:", sub);
         }
     }
+
 
     return NextResponse.json({ ok: true });
 }
