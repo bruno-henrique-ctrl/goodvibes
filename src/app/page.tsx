@@ -84,6 +84,17 @@ export default function Home() {
   const pedirPermissao = async () => {
     if (!("serviceWorker" in navigator)) return;
 
+    // Cria ou garante um userId
+    let idToSave = userId;
+    if (!idToSave) {
+      idToSave = uuidv4();
+      setUserId(idToSave);
+      localStorage.setItem(
+        "userProfile",
+        JSON.stringify({ id: idToSave, name: nome, mood: humor, hobbies: hobbies.split(",").map(h => h.trim()), goals: goals.split(",").map(g => g.trim()), preferences: preferences.split(",").map(p => p.trim()) })
+      );
+    }
+
     const register = await navigator.serviceWorker.ready;
     const sub = await register.pushManager.getSubscription() ||
       await register.pushManager.subscribe({
@@ -92,9 +103,6 @@ export default function Home() {
       });
 
     setSubscription(sub);
-
-    const idToSave = userId || uuidv4();
-    setUserId(idToSave);
 
     await fetch("/api/save", {
       method: "POST",
