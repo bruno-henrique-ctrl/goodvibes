@@ -90,23 +90,10 @@ export default function Home() {
 
     setSubscription(sub);
 
-    let id = userId;
-    if (!id) {
-      id = uuidv4();
-      setUserId(id);
-    }
-
-    const savedProfile = JSON.parse(localStorage.getItem("userProfile") || "{}");
-    savedProfile.id = id;
-    localStorage.setItem("userProfile", JSON.stringify(savedProfile));
-
     await fetch("/api/save", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId: id,
-        sub: sub.toJSON(),
-      }),
+      body: JSON.stringify(sub.toJSON()),
     });
   };
 
