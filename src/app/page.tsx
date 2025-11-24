@@ -47,8 +47,6 @@ export default function Home() {
       }
       setUserId(id);
 
-      localStorage
-
       if ("serviceWorker" in navigator) {
         try {
           const reg = await navigator.serviceWorker.register("/sw.js");
@@ -80,38 +78,76 @@ export default function Home() {
 
     localStorage.setItem("userProfile", JSON.stringify(profile));
   };
-
   const pedirPermissao = async () => {
     if (!("serviceWorker" in navigator)) return;
 
-    // Cria ou garante um userId
-    let idToSave = userId;
-    if (!idToSave) {
+    const savedProfile = localStorage.getItem("userProfile");
+    let idToSave = "";
+    let profileData = { name: nome, mood: humor, hobbies: [], goals: [], preferences: [] };
+
+    if (savedProfile) {
+      const profile = JSON.parse(savedProfile);
+      idToSave = profile.id;
+      profileData = {
+        name: profile.name || nome,
+        mood: profile.mood || humor,
+        hobbies: profile.hobbies || [],
+        goals: profile.goals || [],
+        preferences: profile.preferences || []
+      };
+    } else {
       idToSave = uuidv4();
-      setUserId(idToSave);
-      localStorage.setItem(
-        "userProfile",
-        JSON.stringify({ id: idToSave, name: nome, mood: humor, hobbies: hobbies.split(",").map(h => h.trim()), goals: goals.split(",").map(g => g.trim()), preferences: preferences.split(",").map(p => p.trim()) })
-      );
     }
 
+    setUserId(idToSave);
+
     const register = await navigator.serviceWorker.ready;
-    const sub = await register.pushManager.getSubscription() ||
-      await register.pushManager.subscribe({
+
+    let sub = await register.pushManager.getSubscription();
+    if (!sub) {
+      sub = await register.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: push(vapidKey),
       });
+    }
 
     setSubscription(sub);
+
+    const subJSON = sub.toJSON() as PushSubscriptionJSON & { expirationTime?: number | null };
+
+    if (!subJSON.keys) {
+      throw new Error("Subscription keys estão ausentes!");
+    }
+
+    const completeSub = {
+      endpoint: subJSON.endpoint,
+      expirationTime: subJSON.expirationTime ?? null,
+      keys: {
+        p256dh: subJSON.keys.p256dh,
+        auth: subJSON.keys.auth
+      }
+    };
 
     await fetch("/api/save", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         userId: idToSave,
-        sub: sub.toJSON()
+        sub: completeSub
       }),
     });
+
+    localStorage.setItem(
+      "userProfile",
+      JSON.stringify({
+        id: idToSave,
+        name: profileData.name,
+        mood: profileData.mood,
+        hobbies: profileData.hobbies,
+        goals: profileData.goals,
+        preferences: profileData.preferences
+      })
+    );
   };
 
   const enviarMensagem = async () => {
