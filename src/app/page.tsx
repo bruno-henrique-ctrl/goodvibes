@@ -93,7 +93,7 @@ export default function Home() {
     await fetch("/api/save", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(sub.toJSON()),
+      body: JSON.stringify(sub),
     });
   };
 
