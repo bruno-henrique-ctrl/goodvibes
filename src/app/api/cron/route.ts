@@ -40,25 +40,9 @@ export async function GET(req: NextRequest) {
                 icon: "/icons/icon192.png",
                 url: "/"
             });
-            const parsed = JSON.parse(sub);
 
-            let subscription = parsed;
-
-            if (parsed.sub) {
-                subscription = parsed.sub;
-            }
-
-            if (!subscription.endpoint) {
-                console.error("Subscription inválida:", parsed);
-                continue;
-            }
-
+            const subscription = JSON.parse(sub) as PushSubscription;
             await webPush.sendNotification(subscription, payload);
-
-
-            await webPush.sendNotification(subscription, payload);
-
-
         } catch (err) {
             console.error("Erro ao enviar push:", err, "SUB:", sub);
         }
