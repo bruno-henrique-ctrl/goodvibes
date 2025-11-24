@@ -23,7 +23,6 @@ export async function GET(req: NextRequest) {
 
     const subs = await redis.smembers("subscriptions");
 
-    // 👉 Mensagens pré-definidas ou aleatórias
     const mensagens = [
         "Bom dia! ✨ Que sua manhã seja leve e cheia de paz.",
         "☀️ Nova manhã, novas oportunidades. Você consegue!",
@@ -34,19 +33,20 @@ export async function GET(req: NextRequest) {
 
     for (const sub of subs) {
         try {
-            const parsed: { userId: string; sub: PushSubscription } = JSON.parse(sub);
-
             const msg = mensagens[Math.floor(Math.random() * mensagens.length)];
-
             const payload = JSON.stringify({
                 title: "Mensagem Diária ☀️",
                 body: msg,
                 icon: "/icons/icon192.png",
                 url: "/"
-            });
+            })
 
-            await webPush.sendNotification(parsed.sub, payload);
+            const data = JSON.parse(sub);
 
+            const subscription: PushSubscription =
+                data.endpoint ? data : data.sub;
+
+            await webPush.sendNotification(subscription, payload);
         } catch (err) {
             console.error("Erro ao enviar push:", err, "SUB:", sub);
         }
