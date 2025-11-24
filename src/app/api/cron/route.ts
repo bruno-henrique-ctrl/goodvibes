@@ -16,31 +16,37 @@ webPush.setVapidDetails(
 export async function GET(req: NextRequest) {
     const auth = req.headers.get("Authorization");
     const expected = `Bearer ${process.env.CRON_SECRET}`;
+
     if (auth !== expected) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const subs = await redis.smembers("subscriptions");
 
-    const payloadBase = {
-        title: "Mensagem diária ☀️",
-        icon: "/icons/icon192.png",
-        url: "/",
-    };
+    // 👉 Mensagens pré-definidas ou aleatórias
+    const mensagens = [
+        "Bom dia! ✨ Que sua manhã seja leve e cheia de paz.",
+        "☀️ Nova manhã, novas oportunidades. Você consegue!",
+        "✨ Desejo que hoje você receba boas notícias e bons momentos.",
+        "🌻 Respire fundo. Hoje é um bom dia para recomeçar.",
+        "💛 Que sua energia hoje atraia coisas lindas!"
+    ];
 
     for (const sub of subs) {
         try {
             const parsed: { userId: string; sub: PushSubscription } = JSON.parse(sub);
 
-            const res = await fetch(`/api/generate?id=${parsed.userId}`);
-            const data = await res.json();
+            const msg = mensagens[Math.floor(Math.random() * mensagens.length)];
 
             const payload = JSON.stringify({
-                ...payloadBase,
-                body: data.message || "Bom dia! Que seu dia seja incrível! ✨",
+                title: "Mensagem Diária ☀️",
+                body: msg,
+                icon: "/icons/icon192.png",
+                url: "/"
             });
 
             await webPush.sendNotification(parsed.sub, payload);
+
         } catch (err) {
             console.error("Erro ao enviar push:", err, "SUB:", sub);
         }

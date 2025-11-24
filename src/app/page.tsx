@@ -90,19 +90,16 @@ export default function Home() {
 
     setSubscription(sub);
 
-    // ✔ Garantir que o ID existe ANTES do fetch
     let id = userId;
     if (!id) {
       id = uuidv4();
       setUserId(id);
     }
 
-    // opcional: manter persistido
     const savedProfile = JSON.parse(localStorage.getItem("userProfile") || "{}");
     savedProfile.id = id;
     localStorage.setItem("userProfile", JSON.stringify(savedProfile));
 
-    // ✔ Agora sim enviar o ID + sub corretamente
     await fetch("/api/save", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
