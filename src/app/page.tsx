@@ -14,7 +14,7 @@ export default function Home() {
   const [goals, setGoals] = useState("");
   const [preferences, setPreferences] = useState("");
   const [mensagem, setMensagem] = useState("");
-  const [userId, setUserId] = useState<string>("");
+  const [userId, setUserId] = useState("");
   const [loadingMensagem, setLoadingMensagem] = useState(false);
 
   useEffect(() => {
@@ -30,22 +30,20 @@ export default function Home() {
 
 
   useEffect(() => {
-
-    let id = ''
     const init = async () => {
       const saved = localStorage.getItem("userProfile");
       if (saved) {
         const profile = JSON.parse(saved);
-        id = profile.id || uuidv4();
-        setNome(profile.name || "");
-        setHumor(profile.mood || "");
-        setHobbies((profile.hobbies || []).join(", "));
-        setGoals((profile.goals || []).join(", "));
-        setPreferences((profile.preferences || []).join(", "));
+        setUserId(profile.id);
+        setNome(profile.name);
+        setHumor(profile.mood);
+        setHobbies((profile.hobbies).join(", "));
+        setGoals((profile.goals).join(", "));
+        setPreferences((profile.preferences).join(", "));
+
       } else {
-        id = uuidv4();
+        setUserId(uuidv4());
       }
-      setUserId(id);
 
       if ("serviceWorker" in navigator) {
         try {
@@ -78,81 +76,46 @@ export default function Home() {
 
     localStorage.setItem("userProfile", JSON.stringify(profile));
   };
+
   const pedirPermissao = async () => {
     if (!("serviceWorker" in navigator)) return;
 
-    const savedProfile = localStorage.getItem("userProfile");
-    let idToSave = "";
-    let profileData = { name: nome, mood: humor, hobbies: [], goals: [], preferences: [] };
-
-    if (savedProfile) {
-      const profile = JSON.parse(savedProfile);
-      idToSave = profile.id;
-      profileData = {
-        name: profile.name || nome,
-        mood: profile.mood || humor,
-        hobbies: profile.hobbies || [],
-        goals: profile.goals || [],
-        preferences: profile.preferences || []
-      };
-    } else {
-      idToSave = uuidv4();
-    }
-
-    setUserId(idToSave);
-
     const register = await navigator.serviceWorker.ready;
-
-    let sub = await register.pushManager.getSubscription();
-    if (!sub) {
-      sub = await register.pushManager.subscribe({
+    const sub =
+      (await register.pushManager.getSubscription()) ||
+      (await register.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: push(vapidKey),
-      });
-    }
+      }));
 
     setSubscription(sub);
 
-    const subJSON = sub.toJSON() as PushSubscriptionJSON & { expirationTime?: number | null };
-
-    if (!subJSON.keys) {
-      throw new Error("Subscription keys estão ausentes!");
+    // ✔ Garantir que o ID existe ANTES do fetch
+    let id = userId;
+    if (!id) {
+      id = uuidv4();
+      setUserId(id);
     }
 
-    const completeSub = {
-      endpoint: subJSON.endpoint,
-      expirationTime: subJSON.expirationTime ?? null,
-      keys: {
-        p256dh: subJSON.keys.p256dh,
-        auth: subJSON.keys.auth
-      }
-    };
+    // opcional: manter persistido
+    const savedProfile = JSON.parse(localStorage.getItem("userProfile") || "{}");
+    savedProfile.id = id;
+    localStorage.setItem("userProfile", JSON.stringify(savedProfile));
 
+    // ✔ Agora sim enviar o ID + sub corretamente
     await fetch("/api/save", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        userId: idToSave,
-        sub: completeSub
+        userId: id,
+        sub: sub.toJSON(),
       }),
     });
-
-    localStorage.setItem(
-      "userProfile",
-      JSON.stringify({
-        id: idToSave,
-        name: profileData.name,
-        mood: profileData.mood,
-        hobbies: profileData.hobbies,
-        goals: profileData.goals,
-        preferences: profileData.preferences
-      })
-    );
   };
+
 
   const enviarMensagem = async () => {
     await salvarPerfil();
-
     setLoadingMensagem(true);
 
     try {
@@ -181,6 +144,7 @@ export default function Home() {
     } finally {
       setLoadingMensagem(false);
     }
+
   };
 
   return (
